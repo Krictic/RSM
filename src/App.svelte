@@ -1,3 +1,5 @@
+<!--suppress ALL -->
+
 <script>
 // @ts-nocheck
 
@@ -14,8 +16,8 @@
       valueRange : [2.5, 7.5], // This represents the range of possible value for this ore
       currentValue : 2.5,
       rarity : 0.8, // Rarity goes from 0 to 1, 0 meaning impossible to find and 1 meaning can always find
-      refiningYield : [0.55, 0.75], // This represents the range of possible yield values for this ore, the highter the playeer´s skill, the closer to the second value it is.
-      description : "Ironite is ore rich in iron, can yield up to 75% metallic iron upon refinement. Very common in most asteeroid fields.",
+      refiningYield : [55, 75], // This represents the range of possible yield values for this ore, the higher the player´s skill, the closer to the second value it is.
+      description : "Ironite is ore rich in iron, can yield up to 75% metallic iron upon refinement. Very common in most asteroid fields.",
     })
 
     const copperite = writable({
@@ -23,13 +25,13 @@
       valueRange : [1.5, 5], // This represents the range of possible value for this ore
       currentValue : 1.5,
       rarity : 0.95, // Rarity goes from 0 to 1, 0 meaning impossible to find and 1 meaning can always find
-      refiningYield : [0.72, 0.92], // This represents the range of possible yield values for this ore, the highter the playeer´s skill, the closer to the second value it is.
-      description : "Copperite is ore rich in copper, can yield up to 92% metallic copper upon refinement. Very common in most asteeroid fields.",
+      refiningYield : [72, 92], // This represents the range of possible yield values for this ore, the higher the player´s skill, the closer to the second value it is.
+      description : "Copperite is ore rich in copper, can yield up to 92% metallic copper upon refinement. Very common in most asteroid fields.",
     })
 
   const asteroidField = writable({
     name : "Asteroid Field",
-    description : "This is a place of high denssity of mineral-rich asteroids which can be mined by anyone willing to risk thier lives.",
+    description : "This is a place of high density of mineral-rich asteroids which can be mined by anyone willing to risk their lives.",
     ores : [$ironite, $copperite],
   })
 
@@ -68,6 +70,10 @@
 
   }
 
+  function updateTick() {
+    priceRandomizer();
+  }
+
   function priceRandomizer() {
     $ironite.currentValue = (Math.random() * ($ironite.valueRange[1] - $ironite.valueRange[0]) + $ironite.valueRange[0]).toFixed(2);
     $copperite.currentValue = (Math.random() * ($copperite.valueRange[1] - $copperite.valueRange[0]) + $copperite.valueRange[0]).toFixed(2);
@@ -77,15 +83,23 @@
     if (!$isAtField) return;
     if ($cargoFull) return;
 
-    const miningYield =
-      Math.floor(Math.random() * ($ship.yieldMin - $ship.yieldMax + 1)) + $ship.yieldMin;
+    const miningYield = Math.round(Math.random() * ($ship.yieldMax - $ship.yieldMin) + $ship.yieldMin);
 
     if ($oreCargo + miningYield >= $oreHold) {
       $oreCargo = $oreHold;
     } else {
-      $oreCargo += miningYield;
-      $message = `You have mined ${Math.round(miningYield)}m3 of ironite ore.`;
-      priceRandomizer();
+      let liquidOreYield;
+      if (Math.random() < 0.5) {
+        liquidOreYield = (miningYield / 100) * $ironite.refiningYield[0];
+        $oreCargo += liquidOreYield;
+        $message = `You have mined ${Math.round(liquidOreYield)}m3 of ironite ore. (raw: ${miningYield})`;
+        updateTick();
+      } else {
+        liquidOreYield = (miningYield / 100) * $copperite.refiningYield[0];
+        $oreCargo += liquidOreYield;
+        $message = `You have mined ${Math.round(liquidOreYield)}m3 of copperite ore. (raw: ${miningYield})`;
+        updateTick();
+      }
     }
   }
 
@@ -242,9 +256,9 @@
 <div id="game">
   <div id="info">
     <h1>Current Ship: {$ship.name}</h1>
-    <h2>Ironite Price: {$ironite.currentValue}</h2>
-    <h2>Copperite Price: {$copperite.currentValue}</h2>
     <h2>Credits: {Math.round($credits.toFixed(2))}</h2>
+    <h2>Ironite Yield: {$ironite.refiningYield[0]}%</h2>
+    <h2>Ironite Yield: {$copperite.refiningYield[0]}%</h2>
 
     <p>
       Ore cargo: {Math.round($oreCargo)} / {Math.round($oreHold)} m<sup>3</sup>
