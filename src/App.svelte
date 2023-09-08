@@ -11,22 +11,22 @@
   const oreValue = writable(10);
 
   const ironite = writable({
-      name : "Ironite",
-      valueRange : [2.5, 7.5], // This represents the range of possible value for this ore
-      currentValue : 2.5,
-      rarity : 0.8, // Rarity goes from 0 to 1, 0 meaning impossible to find and 1 meaning can always find
-      refiningYield : [55, 75], // This represents the range of possible yield values for this ore, the higher the player´s skill, the closer to the second value it is.
-      description : "Ironite is ore rich in iron, can yield up to 75% metallic iron upon refinement. Very common in most asteroid fields.",
-    })
+    name : "Ironite",
+    valueRange : [2.5, 7.5], // This represents the range of possible value for this ore
+    currentValue : 2.5,
+    rarity : 0.8, // Rarity goes from 0 to 1, 0 meaning impossible to find and 1 meaning can always find
+    refiningYield : [55, 75], // This represents the range of possible yield values for this ore, the higher the player´s skill, the closer to the second value it is.
+    description : "Ironite is ore rich in iron, can yield up to 75% metallic iron upon refinement. Very common in most asteroid fields.",
+  })
 
-    const copperite = writable({
-      name : "Copperite",
-      valueRange : [1.5, 5], // This represents the range of possible value for this ore
-      currentValue : 1.5,
-      rarity : 0.95, // Rarity goes from 0 to 1, 0 meaning impossible to find and 1 meaning can always find
-      refiningYield : [72, 92], // This represents the range of possible yield values for this ore, the higher the player´s skill, the closer to the second value it is.
-      description : "Copperite is ore rich in copper, can yield up to 92% metallic copper upon refinement. Very common in most asteroid fields.",
-    })
+  const copperite = writable({
+    name : "Copperite",
+    valueRange : [1.5, 5], // This represents the range of possible value for this ore
+    currentValue : 1.5,
+    rarity : 0.95, // Rarity goes from 0 to 1, 0 meaning impossible to find and 1 meaning can always find
+    refiningYield : [72, 92], // This represents the range of possible yield values for this ore, the higher the player´s skill, the closer to the second value it is.
+    description : "Copperite is ore rich in copper, can yield up to 92% metallic copper upon refinement. Very common in most asteroid fields.",
+  })
 
   const asteroidField = writable({
     name : "Asteroid Field",
@@ -43,10 +43,11 @@
   const isAtStation = writable(false);
   const mineButtonClicked = writable(false);
   const travelButtonClicked = writable(false);
-  const hasDrones = writable(false);
+  const hasDrones = writable(true);
   const areDronesMining = writable(false);
-  const droneMineTime = writable(1);
+  const droneMineTime = writable(10);
   const dronesYield = writable([100, 150]);
+  const interruptDronesBtn = writable(false);
 
   const ship = writable({
     name : "Small Mining Barge Type A",
@@ -65,8 +66,32 @@
 
   }
 
-  function dronesMining() {
+  function droneMiningTick() {
+    if (!$hasDrones) {
+      $message = "You need to buy drones at the station."
+      return;
+    }
+    console.log("Drones called 1")
+    let startTime = Date.now();
+    let expected = startTime;
+    let timestamp = Date.now();
+    let drift = timestamp - expected;
 
+    if (drift < 1000) {
+      console.log("Drones called 2")
+      setTimeout(droneMiningTick, 1000 - drift);
+    } else {
+      console.log("Drones called 3")
+      setTimeout(droneMiningTick, 0);
+    }
+
+    while (!interruptDronesBtn || $cargoFull) {
+      console.log("Drones called 4")
+      mine(dronesYield[0], dronesYield[1]);
+    }
+
+    expected += 1000;
+    console.log("Drones called 5")
   }
 
   function updateTick() {
@@ -78,11 +103,14 @@
     $copperite.currentValue = Math.random() * ($copperite.valueRange[1] - $copperite.valueRange[0]) + $copperite.valueRange[0];
   }
 
-  function mine() {
-    if (!$isAtField) return;
-    if ($cargoFull) return;
+  /**
+   * @param {number} minYield
+   * @param {number} maxYield
+   */
+  function mine(minYield, maxYield) {
+    if (!$isAtField || $cargoFull) return;
 
-    const miningYield = Math.round(Math.random() * ($ship.yieldMax - $ship.yieldMin) + $ship.yieldMin);
+    const miningYield = Math.round(Math.random() * (maxYield - minYield) + minYield);
 
     if ($oreCargo + miningYield >= $oreHold) {
       $oreCargo = $oreHold;
@@ -106,10 +134,10 @@
     if ($isAtField) {
       let timer;
       if (
-        $mineButtonClicked ||
-        $cargoFull ||
-        $travelButtonClicked ||
-        !$isAtField
+              $mineButtonClicked ||
+              $cargoFull ||
+              $travelButtonClicked ||
+              !$isAtField
       )
         return;
 
@@ -134,7 +162,7 @@
 
     if (newTimeLeft <= 0) {
       clearInterval(timer);
-      mine();
+      mine($ship.yieldMin, $ship.yieldMax);
       $mineButtonClicked = false;
       $ship.mineTime = $ship.mineTimeReset;
     }
@@ -172,7 +200,7 @@
   }
 
   function startProgress() {
-    if (!$mineButtonClicked && !$travelButtonClicked) return;
+    if (!$mineButtonClicked && !$travelButtonClicked && !$areDronesMining) return;
 
     let timer;
     if ($mineButtonClicked) {
@@ -277,6 +305,10 @@
   <div id="controls">
     {#if $isAtField}
       <button on:click={miningTimer} title="Yield: {Math.round($ship.yieldMin)}/{Math.round($ship.yieldMax)} Time: {$ship.mineTime.toFixed(2)}">Mine Asteroid</button>
+      {#if $hasDrones}
+        <button on:click={droneMiningTick} title="Yield: {Math.round($dronesYield[0])}/{Math.round($dronesYield[1])} Time: {$droneMineTime.toFixed(2)}">Drone Mining</button>
+        <button on:click={() => $interruptDronesBtn = !interruptDronesBtn}>Click to Interrupt Drones</button>
+      {/if}
     {/if}
 
     <button on:click={travelTimer} class="to-station" title="Time to Destination: {$ship.travelTime}s">
