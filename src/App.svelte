@@ -7,49 +7,85 @@
   const oreCargo = writable(0);
   const oreHold = writable(5000);
 
-  const oreValue = 10;
+  const oreValue = writable(10);
 
-  const minYield = writable(250);
-  const maxYield = writable(500);
-  const mineTime = writable(1);
-  const mineTimeReset = writable(1);
-  const travelTime = writable(1);
+  const ironite = writable({
+      name : "Ironite",
+      valueRange : [2.5, 7.5], // This represents the range of possible value for this ore
+      currentValue : 2.5,
+      rarity : 0.8, // Rarity goes from 0 to 1, 0 meaning impossible to find and 1 meaning can always find
+      refiningYield : (0.55, 0.75), // This represents the range of possible yield values for this ore, the highter the playeer´s skill, the closer to the second value it is.
+      description : "Ironite is ore rich in iron, can yield up to 75% metallic iron upon refinement. Very common in most asteeroid fields.",
+    })
 
-  const isAtField = writable(true);
-  const isAtStation = writable(false);
+    const copperite = writable({
+      name : "Copperite",
+      valueRange : [1.5, 5], // This represents the range of possible value for this ore
+      currentValue : 1.5,
+      rarity : 0.95, // Rarity goes from 0 to 1, 0 meaning impossible to find and 1 meaning can always find
+      refiningYield : (0.72, 0.92), // This represents the range of possible yield values for this ore, the highter the playeer´s skill, the closer to the second value it is.
+      description : "Copperite is ore rich in copper, can yield up to 92% metallic copper upon refinement. Very common in most asteeroid fields.",
+    })
+
+  const asteroidField = writable({
+    name : "Asteroid Field",
+    description : "This is a place of high denssity of mineral-rich asteroids which can be mined by anyone willing to risk thier lives.",
+    ores : [$ironite, $copperite],
+  })
 
   const cargoFull = derived(oreCargo, ($oreCargo) => $oreCargo >= $oreHold);
-
-  const mineButtonClicked = writable(false);
-  const travelButtonClicked = writable(false);
 
   const progress = writable(0);
   const message = writable("");
 
-  const yieldUpgradeCost = writable(20000);
-  const miningTimeUpgradeCost = writable(40000);
-  const oreCargoHoldUpgradeCost = writable(45000);
-
-  const yieldUpgradeLevel = writable(0);
-  const miningTimeUpgradeLevel = writable(0);
-  const oreCargoHoldUpgradeLevel = writable(0);
+  const isAtField = writable(true);
+  const isAtStation = writable(false);
+  const mineButtonClicked = writable(false);
+  const travelButtonClicked = writable(false);
+  const hasDrones = writable(false);
+  const areDronesMining = writable(false);
+  const droneMineTime = writable(1);
+  const dronesYield = writable((100, 150));
 
   const ship = writable({
-    name: "Mining Barge Type A",
+    name : "Small Mining Barge Type A",
+    description : "This is a small mining barge which can be used to mine asteroids.",
+    yieldMin : 250,
+    yieldMax : 500,
+    mineTime : 1,
+    mineTimeReset : 1,
+    travelTime : 1,
+    yieldUpgradeCost : 20000,
+    miningTimeUpgradeCost : 40000,
+    oreCargoHoldUpgradeCost : 45000,
   })
+
+  function asteroidSpawn() {
+
+  }
+
+  function dronesMining() {
+
+  }
+
+  function priceRandomizer() {
+    $ironite.currentValue = (Math.random() * ($ironite.valueRange[1] - $ironite.valueRange[0]) + $ironite.valueRange[0]).toFixed(2);
+    $copperite.currentValue = (Math.random() * ($copperite.valueRange[1] - $copperite.valueRange[0]) + $copperite.valueRange[0]).toFixed(2);
+  }
 
   function mine() {
     if (!$isAtField) return;
     if ($cargoFull) return;
 
     const miningYield =
-      Math.floor(Math.random() * ($maxYield - $minYield + 1)) + $minYield;
+      Math.floor(Math.random() * ($ship.yieldMin - $ship.yieldMax + 1)) + $ship.yieldMin;
 
     if ($oreCargo + miningYield >= $oreHold) {
       $oreCargo = $oreHold;
     } else {
       $oreCargo += miningYield;
       $message = `You have mined ${Math.round(miningYield)}m3 of ironite ore.`;
+      priceRandomizer();
     }
   }
 
@@ -67,7 +103,7 @@
       $mineButtonClicked = true;
       startProgress();
 
-      const deadline = Date.now() + $mineTime * 1000;
+      const deadline = Date.now() + $ship.mineTime * 1000;
 
       timer = setInterval(() => miningCallback(deadline, timer), 1000);
 
@@ -81,13 +117,13 @@
    */
   function miningCallback(deadline, timer) {
     const newTimeLeft = Math.round((deadline - Date.now()) / 1000);
-    $mineTime = newTimeLeft > 0 ? newTimeLeft : 0;
+    $ship.mineTime = newTimeLeft > 0 ? newTimeLeft : 0;
 
     if (newTimeLeft <= 0) {
       clearInterval(timer);
       mine();
       $mineButtonClicked = false;
-      $mineTime = $mineTimeReset;
+      $ship.mineTime = $ship.mineTimeReset;
     }
   }
 
@@ -104,17 +140,17 @@
 
     $message = "Travelling...";
 
-    const deadline = Date.now() + $travelTime * 1000;
+    const deadline = Date.now() + $ship.travelTime * 1000;
 
     const timer = setInterval(() => {
       const newTimeLeft = Math.round((deadline - Date.now()) / 1000);
-      $travelTime = newTimeLeft > 0 ? newTimeLeft : 0;
+      $ship.travelTime = newTimeLeft > 0 ? newTimeLeft : 0;
 
       if (newTimeLeft <= 0) {
         clearInterval(timer);
         travel();
         $travelButtonClicked = false;
-        $travelTime = 1;
+        $ship.travelTime = 1;
         $message = "";
       }
     }, 1000);
@@ -127,9 +163,9 @@
 
     let timer;
     if ($mineButtonClicked) {
-      timer = $mineTime;
+      timer = $ship.mineTime;
     } else {
-      timer = $travelTime;
+      timer = $ship.travelTime;
     }
 
     const startTime = Date.now();
@@ -160,40 +196,40 @@
       return;
     }
 
-    $message = `${$oreCargo} Ores sold at ${oreValue} credits/m3 for ${
-      $oreCargo * oreValue
+    $message = `${$oreCargo} Ores sold at ${$oreValue} credits/m3 for ${
+      $oreCargo * $oreValue
     } credits.`;
-    $credits += $oreCargo * oreValue;
+    credits.update((prevCreds) => prevCreds + ($oreCargo * $oreValue))
     $oreCargo = 0;
   }
 
   function buyUpgrade(upgradeType) {
     if (upgradeType === "yield") {
-      if ($credits >= $yieldUpgradeCost) {
-        $credits -= $yieldUpgradeCost;
-        $minYield *= 1.05;
-        $maxYield *= 1.05;
-        $yieldUpgradeCost *= 1.5;
-        $message = "New yield: " + Math.round($minYield) + " / " + Math.round($maxYield);
+      if ($credits >= $ship.yieldUpgradeCost) {
+        $credits -= $ship.yieldUpgradeCost;
+        $ship.yieldMin *= 1.05;
+        $ship.yieldMax *= 1.05;
+        $ship.yieldUpgradeCost *= 1.5;
+        $message = "New yield: " + Math.round($ship.yieldMin + " / " + Math.round($ship.yieldMax));
       } else {
         $message = "Cannot buy.";
       }
     } else if (upgradeType === "miningTime") {
-      if ($credits >= $miningTimeUpgradeCost) {
-        $credits -= $miningTimeUpgradeCost;
-        $mineTime *= 0.96;
-        $mineTimeReset *= 0.96;
+      if ($credits >= $ship.miningTimeUpgradeCost) {
+        $credits -= $ship.miningTimeUpgradeCost;
+        $ship.mineTime *= 0.96;
+        $ship.mineTimeReset *= 0.96;
         $mine
-        $miningTimeUpgradeCost *= 1.5;
-        $message = "New time: " + $mineTime + "s";
+        $ship.miningTimeUpgradeCost *= 1.5;
+        $message = "New time: " + $ship.mineTime + "s";
       } else {
         $message = "Cannot buy.";
       }
     } else if (upgradeType === "oreCargo") {
-      if ($credits >= $oreCargoHoldUpgradeCost) {
-        $credits -= $oreCargoHoldUpgradeCost;
+      if ($credits >= $ship.oreCargoHoldUpgradeCost) {
+        $credits -= $ship.oreCargoHoldUpgradeCost;
         $oreHold *= 1.05;
-        $oreCargoHoldUpgradeCost *= 1.4;
+        $ship.oreCargoHoldUpgradeCost *= 1.4;
       } else {
         $message = "Cannot buy.";
       }
@@ -206,7 +242,8 @@
 <div id="game">
   <div id="info">
     <h1>Current Ship: {$ship.name}</h1>
-
+    <h2>Ironite Price: {$ironite.currentValue}</h2>
+    <h2>Copperite Price: {$copperite.currentValue}</h2>
     <h2>Credits: {Math.round($credits.toFixed(2))}</h2>
 
     <p>
@@ -224,10 +261,10 @@
 
   <div id="controls">
     {#if $isAtField}
-      <button on:click={miningTimer} title="Yield: {Math.round($minYield)}/{Math.round($maxYield)} Time: {$mineTime.toFixed(2)}">Mine Asteroid</button>
+      <button on:click={miningTimer} title="Yield: {Math.round($ship.yieldMin)}/{Math.round($ship.yieldMax)} Time: {$ship.mineTime.toFixed(2)}">Mine Asteroid</button>
     {/if}
 
-    <button on:click={travelTimer} class="to-station" title="Time to Destination: {$travelTime}s">
+    <button on:click={travelTimer} class="to-station" title="Time to Destination: {$ship.travelTime}s">
       {#if $isAtField}
         Travel to Station
       {:else}
@@ -239,15 +276,15 @@
       <button on:click={sell}>Sell Ore</button>
       <div id="upgrades">
         <button class="upgrade" on:click={() => buyUpgrade("yield")}>
-          Increase Yield ({Math.round($yieldUpgradeCost)} credits)
+          Increase Yield ({Math.round($ship.yieldUpgradeCost)} credits)
         </button>
 
         <button class="upgrade" on:click={() => buyUpgrade("miningTime")}>
-          Decrease Mining Time ({Math.round($miningTimeUpgradeCost)} credits)
+          Decrease Mining Time ({Math.round($ship.miningTimeUpgradeCost)} credits)
         </button>
 
         <button class="upgrade" on:click={() => buyUpgrade("oreCargo")}>
-          Increase Cargo Hold ({Math.round($oreCargoHoldUpgradeCost)} credits)
+          Increase Cargo Hold ({Math.round($ship.oreCargoHoldUpgradeCost)} credits)
         </button>
       </div>
     {/if}
