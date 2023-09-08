@@ -1,7 +1,6 @@
 <!--suppress ALL -->
 
 <script>
-// @ts-nocheck
 
   import { writable, derived } from "svelte/store";
 
@@ -75,8 +74,8 @@
   }
 
   function priceRandomizer() {
-    $ironite.currentValue = (Math.random() * ($ironite.valueRange[1] - $ironite.valueRange[0]) + $ironite.valueRange[0]).toFixed(2);
-    $copperite.currentValue = (Math.random() * ($copperite.valueRange[1] - $copperite.valueRange[0]) + $copperite.valueRange[0]).toFixed(2);
+    $ironite.currentValue = Math.random() * ($ironite.valueRange[1] - $ironite.valueRange[0]) + $ironite.valueRange[0];
+    $copperite.currentValue = Math.random() * ($copperite.valueRange[1] - $copperite.valueRange[0]) + $copperite.valueRange[0];
   }
 
   function mine() {
@@ -217,6 +216,9 @@
     $oreCargo = 0;
   }
 
+  /**
+   * @param {string} upgradeType
+   */
   function buyUpgrade(upgradeType) {
     if (upgradeType === "yield") {
       if ($credits >= $ship.yieldUpgradeCost) {
@@ -224,7 +226,7 @@
         $ship.yieldMin *= 1.05;
         $ship.yieldMax *= 1.05;
         $ship.yieldUpgradeCost *= 1.5;
-        $message = "New yield: " + Math.round($ship.yieldMin + " / " + Math.round($ship.yieldMax));
+        $message = "New yield: " + Math.round($ship.yieldMin) + " / " + Math.round($ship.yieldMax);
       } else {
         $message = "Cannot buy.";
       }
@@ -233,7 +235,6 @@
         $credits -= $ship.miningTimeUpgradeCost;
         $ship.mineTime *= 0.96;
         $ship.mineTimeReset *= 0.96;
-        $mine
         $ship.miningTimeUpgradeCost *= 1.5;
         $message = "New time: " + $ship.mineTime + "s";
       } else {
@@ -256,7 +257,7 @@
 <div id="game">
   <div id="info">
     <h1>Current Ship: {$ship.name}</h1>
-    <h2>Credits: {Math.round($credits.toFixed(2))}</h2>
+    <h2>Credits: {Math.round($credits)}</h2>
     <h2>Ironite Yield: {$ironite.refiningYield[0]}%</h2>
     <h2>Ironite Yield: {$copperite.refiningYield[0]}%</h2>
 
