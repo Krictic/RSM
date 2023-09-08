@@ -14,7 +14,7 @@
       valueRange : [2.5, 7.5], // This represents the range of possible value for this ore
       currentValue : 2.5,
       rarity : 0.8, // Rarity goes from 0 to 1, 0 meaning impossible to find and 1 meaning can always find
-      refiningYield : (0.55, 0.75), // This represents the range of possible yield values for this ore, the highter the playeer´s skill, the closer to the second value it is.
+      refiningYield : [0.55, 0.75], // This represents the range of possible yield values for this ore, the highter the playeer´s skill, the closer to the second value it is.
       description : "Ironite is ore rich in iron, can yield up to 75% metallic iron upon refinement. Very common in most asteeroid fields.",
     })
 
@@ -23,7 +23,7 @@
       valueRange : [1.5, 5], // This represents the range of possible value for this ore
       currentValue : 1.5,
       rarity : 0.95, // Rarity goes from 0 to 1, 0 meaning impossible to find and 1 meaning can always find
-      refiningYield : (0.72, 0.92), // This represents the range of possible yield values for this ore, the highter the playeer´s skill, the closer to the second value it is.
+      refiningYield : [0.72, 0.92], // This represents the range of possible yield values for this ore, the highter the playeer´s skill, the closer to the second value it is.
       description : "Copperite is ore rich in copper, can yield up to 92% metallic copper upon refinement. Very common in most asteeroid fields.",
     })
 
@@ -45,7 +45,7 @@
   const hasDrones = writable(false);
   const areDronesMining = writable(false);
   const droneMineTime = writable(1);
-  const dronesYield = writable((100, 150));
+  const dronesYield = writable([100, 150]);
 
   const ship = writable({
     name : "Small Mining Barge Type A",
