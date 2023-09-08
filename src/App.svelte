@@ -255,112 +255,112 @@
 </div>
 
 <style>
-  :root {
-    --primary-color: #f47a20;
-    --secondary-color: #ff8e3c;
-    --background-color: #0a0e14;
-    --text-color: #e1e5ea;
-    --dark-color: #131a22;
-    --accent-color: #b65c1c;
-    --progress-bar-color: var(--secondary-color);
-  }
+:root {
+  --primary-color: #f47a20;
+  --secondary-color: #ff8e3c;
+  --background-color: #0a0e14;
+  --text-color: #e1e5ea;
+  --dark-color: #131a22;
+  --accent-color: #b65c1c;
+  --progress-bar-color: var(--secondary-color);
+}
 
-  #game {
-    max-width: 800px;
-    margin: 50px auto;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: center;
-    align-items: center;
-  }
+#game {
+  max-width: 800px;
+  margin: 5% auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+}
 
-  #info {
-    flex: 1;
-    text-align: center;
-    padding: 20px;
-  }
+#info {
+  flex: 1;
+  text-align: center;
+  padding: 2rem;
+}
 
-  #controls {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 20px;
-  }
+#controls {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2rem;
+}
 
-  h1 {
-    font-size: 32px;
-    margin-bottom: 20px;
-  }
+h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
 
-  h2 {
-    font-size: 28px;
-    margin-bottom: 10px;
-  }
+h2 {
+  font-size: 1.8rem;
+  margin-bottom: 0.5rem;
+}
 
-  p {
-    line-height: 1.6;
-  }
+p {
+  line-height: 1.6;
+}
 
-  #progress-container {
-    width: 100%;
-    height: 20px;
-    background-color: var(--dark-color);
-    border-radius: 5px;
-    margin-top: 20px;
-    overflow: hidden;
-  }
+#progress-container {
+  width: 100%;
+  height: 2rem;
+  background-color: var(--dark-color);
+  border-radius: 0.5rem;
+  margin-top: 1rem;
+  overflow: hidden;
+}
 
-  #progress-bar {
-    width: 0;
-    height: 100%;
-    background-color: var(--progress-bar-color);
-    transition: width ease-in-out;
-  }
+#progress-bar {
+  width: 0;
+  height: 100%;
+  background-color: var(--progress-bar-color);
+  transition: width ease-in-out;
+}
 
-  #message {
-    margin: 20px 0;
-    padding: 10px;
-    background-color: var(--dark-color);
-    border-radius: 5px;
-  }
+#message {
+  margin: 1rem 0;
+  padding: 0.5rem;
+  background-color: var(--dark-color);
+  border-radius: 0.5rem;
+}
 
-  button {
-    background-color: var(--primary-color);
-    color: var(--background-color);
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    margin-top: 10px;
-  }
+button {
+  background-color: var(--primary-color);
+  color: var(--background-color);
+  border: none;
+  padding: 1rem 2rem;
+  font-size: 1rem;
+  border-radius: 0.5rem;
+  transition: background-color 0.2s;
+  margin-top: 1rem;
+}
 
-  button:hover {
-    background-color: var(--secondary-color);
-  }
+button:hover {
+  background-color: var(--secondary-color);
+}
 
-  button.to-station {
-    background-color: var(--secondary-color);
-  }
+button.to-station {
+  background-color: var(--secondary-color);
+}
 
-  #upgrades {
-    margin-top: 40px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
+#upgrades {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
-  .upgrade {
-    background-color: var(--accent-color);
-    padding: 20px;
-    border-radius: 10px;
-    margin-bottom: 20px;
-    width: 200px;
-  }
+.upgrade {
+  background-color: var(--accent-color);
+  padding: 2rem;
+  border-radius: 1rem;
+  margin-bottom: 2rem;
+  width: 10rem;
+}
 
-  .upgrade:hover {
-    background-color: var(--secondary-color);
-  }
+.upgrade:hover {
+  background-color: var(--secondary-color);
+}
+
 </style>
